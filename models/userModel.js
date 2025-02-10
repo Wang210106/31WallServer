@@ -1,45 +1,60 @@
-const pool = require('../config/db');
+// userModel.js
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
 
-const userModel = {
-  // 创建用户表（初始化时使用）
-  createTable: async () => {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        openid VARCHAR(255) UNIQUE NOT NULL,
-        nickname VARCHAR(255),
-        avatar_url VARCHAR(255),
-        gender TINYINT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
-    await pool.query(sql);
-  },
-  createUser: async (openid, nickname, avatarUrl, gender) => {
-    const sql = 'INSERT INTO users (openid, nickname, avatar_url, gender) VALUES (?, ?, ?, ?)';
-    const values = [openid, nickname, avatarUrl, gender];
-    try {
-      const [results, fields] = await pool.query(sql, values);
+dotenv.config();
+ 
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,     
+  user: process.env.DB_USER,   
+  password: process.env.DB_PASSWORD, 
+  database: process.env.DB_NAME,  
+});
+ 
+function getUserList(callback) {
+  pool.query('SELECT * FROM users', (error, results, fields) => {
+    if (error) throw error;
+    callback(null, results);
+  });
+}
+ 
+function getUserByOpenId(openid, callback) {
+  pool.query('SELECT * FROM users WHERE openid = ?', [openid], (error, results, fields) => {
+    if (error) throw error;
+    callback(null, results.length > 0 ? results[0] : null);
+  });
+}
 
-      const lastInsertId = results.insertId;
-      return { id: lastInsertId };
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw error;
-    }
-  },
-
-  // 获取用户列表
-  getUsers: async () => {
-    const sql = 'SELECT * FROM users';
-    try {
-      const [rows, fields] = await pool.query(sql);
-      return rows; // 用户列表
-    } catch (error) {
-      console.error('Error retrieving users:', error);
-      throw error; 
-    }
-  },
+function createUser(user, callback) {
+  const { openid, nickname, avatar_url, gender } = user;
+  const query = 'INSERT INTO users (openid, nickname, avatar_url, gender, created_at) VALUES (?, ?, ?, ?, NOW())';
+  pool.query(query, [openid, nickname, avatar_url, gender], (error, results, fields) => {
+    if (error) throw error;
+    callback(null, results.insertId); // 返回插入的ID
+  });
+}
+ 
+// 更新用户信息的函数
+function updateUser(user, callback) {
+  const { openid, nickname, avatar_url, gender } = user;
+  const query = 'UPDATE users SET nickname = ?, avatar_url = ?, gender = ? WHERE openid = ?';
+  pool.query(query, [nickname, avatar_url, gender, openid], (error, results, fields) => {
+    if (error) throw error;
+    callback(null, results); 
+  });
+}
+ 
+function closePool() {
+  pool.end((error) => {
+    if (error) throw error;
+    console.log('Database connection pool closed.');
+  });
+}
+ 
+module.exports = {
+  getUserList,
+  getUserByOpenId,
+  createUser,
+  updateUser,
+  closePool 
 };
-
-module.exports = userModel;

@@ -1,23 +1,13 @@
 const express = require('express');
 const app = express();
-const userRoutes = require('./routes/userRoutes'); 
+const userController = require('./controllers/userController');
  
-app.use(express.json()); 
-
-const createTable = require('./models/userModel').createTable;
-
-(async () => {
-    await userModel.createTable(); 
-})();
-
-app.use('/api', userRoutes); 
+app.use(express.json());
  
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
+// 挂载用户路由
+app.use('/', userController); 
  
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
