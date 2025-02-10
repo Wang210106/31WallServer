@@ -4,6 +4,12 @@ const userRoutes = require('./routes/userRoutes');
  
 app.use(express.json()); 
 
+const createTable = require('./models/userModel').createTable;
+
+(async () => {
+    await userModel.createTable(); 
+})();
+
 app.use('/api', userRoutes); 
  
 app.use((err, req, res, next) => {

@@ -1,22 +1,31 @@
-const User = require('../models/userModel'); 
+const userModel = require('../models/userModel'); 
  
-// 获取用户列表
-exports.getUserList = async (req, res) => {
+const userController = {
+  // 获取用户列表
+  getUsers: async (req, res) => {
     try {
-        const users = await User.find(); 
-        res.status(200).json(users);
+      const users = await userModel.getUsers();
+      res.status(200).json(users);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      console.error('Error retrieving users:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
+  },
+ 
+  // 创建新用户
+  createUser: async (req, res) => {
+    try {
+      const { openid, nickname, avatarUrl, gender } = req.body;
+ 
+      const newUser = await userModel.createUser(openid, nickname, avatarUrl, gender);
+ 
+      // 返回新创建的用户的ID
+      res.status(201).json(newUser);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(400).json({ error: 'Bad Request' });
+    }
+  },
 };
  
-// 创建新用户
-exports.createUser = async (req, res) => {
-    const newUser = new User(req.body); 
-    try {
-        const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
+module.exports = userController;
