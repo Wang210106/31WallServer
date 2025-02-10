@@ -1,11 +1,17 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
+const userRoutes = require('./routes/userRoutes'); 
+ 
+app.use(express.json()); 
 
-app.get('/', (req, res) => {
-  res.send('欢迎使用微信云托管！')
-})
-
-const port = process.env.PORT || 80
-app.listen(port, () => {
-  console.log('服务启动成功，端口：', port)
-})
+app.use('/api', userRoutes); 
+ 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+ 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
