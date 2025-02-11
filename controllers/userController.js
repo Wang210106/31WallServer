@@ -3,51 +3,54 @@ const express = require('express');
 const router = express.Router();
 const userModel = require('../models/userModel'); 
  
-router.post('/user', (req, res) => {
-  //检验是否存在
-    const openid = req.body.openid;
-    userModel.getUserByOpenId(openid, (error, user) => {
-      if (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-      }
-      if (!user) {
-        //不存在那么新建用户
-        const newUser = req.body; 
-    
-        userModel.createUser(newUser, (error, userId) => {
-          if (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
-          }
+//創建用戶
+router.post('/', (req, res) => {
+  const newUser = req.body; 
 
-          console.log(newUser)
-          return res.status(200).json({ id: userId, message: 'User Created Successfully' });
-        });
-      }
-      else{
-        const updatedUser = req.body; 
+  userModel.createUser(newUser, (error, userId) => {
+    if (error) {
+      return res.status(500).json({ message: 'Can\'t create user!' });
+    }
 
-        userModel.updateUser({ ...updatedUser }, (error, results) => {
-          if (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
-          }
-          if (!results.affectedRows > 0) {
-            return res.status(404).json({ message: 'User Not Found or Update Failed' });
-          }
-          console.log(user)
-          res.json({ message: 'User Updated Successfully' , id: user.id });
-        });
-      }
-    });
+    console.log(newUser)
+    return res.json({ id: userId, message: 'User Created Successfully' });
+  });
+})
+
+//findByOpenid
+router.get("/", (req, res) => {
+  const openid = parseInt(req.query.openid, 10);
+  
+  userModel.getUserByOpenId(openid, (err, result) => {
+    if (err){
+      return res.status(404).json({ message: "User not Found!" })
+    }
+
+    res.json(result)
+  })
 })
 
 // 获取用户列表的路由
-router.get('/users/all', (req, res) => {
+router.get('/all', (req, res) => {
   userModel.getUserList((error, users) => {
     if (error) {
-      return res.status(500).json({ message: 'Internal Server Error' });
+      return res.status(500).json({ message: 'Internal Server Error caused by YOU' });
     }
     res.json(users);
   });
 });
+
+//刪除用戶
+router.delete('/', (req, res) => {
+  const openid = parseInt(req.query.openid, 10);
+
+  userModel.deleteUser(openid, (err, result) => {
+    if (err) {
+      return res.status(400).json({ message: 'Can\'nt delete' });
+    }
+
+    res.json(result)
+  })
+})
  
 module.exports = router;
