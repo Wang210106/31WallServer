@@ -8,7 +8,7 @@ const pool = require('../config/db')
 // user_id int,
 // content text,
 // images text,
-// created_at timestamp default current_timestamp,
+// created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 // foreign key (user_id) references users(id)
 // );
 
@@ -28,8 +28,7 @@ function createPost(post, callback){
 
 function getPostsList(callback){
   pool.query('SELECT * FROM posts', (err, res, fields) => {
-    if (err) throw err;
-    callback(null, res);
+    callback(!!err, res);
   });
 }
 

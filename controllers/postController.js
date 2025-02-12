@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const postModel = require('../models/postModel'); 
+const likeModel = require('../models/likeModel');
 
 router.post('/', (req, res) => {
     const post = req.body;
@@ -70,6 +71,39 @@ router.get('/userid', (req, res) => {
     
         res.json(result);
     })
+})
+
+//点赞
+router.post('/like', (req, res) => {
+    const { user_id, post_id } = req.body;
+
+    if (!user_id || !post_id) {
+        return res.status(400).json({ message: 'user_id and post_id are required' });
+    }
+
+    likeModel.isLiked(user_id, post_id,(err, isLiked) => {
+        if (err) {
+            console.error('Error checking like:', err);
+            return res.status(400).json({ message: 'Internal server error' });
+        }
+
+        // 已经点赞过
+        if (isLiked) {
+            return res.status(400).json({ message: 'User has already liked this post' });
+        }
+
+        likeModel.createLike({ user_id, post_id }, (errerr, reslut) => {
+            if(errerr){
+                return res.status(400).json({ message: 'Internal server error' });
+            }
+
+            return res.json(reslut)
+        })
+    })
+})
+
+router.delete('/post/like', (req, res) => {
+    
 })
 
 module.exports = router;
