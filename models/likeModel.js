@@ -11,18 +11,16 @@ const pool = require('../config/db')
 // FOREIGN KEY (post_id) REFERENCES posts(post_id)
 // );
 
-function createLike(info, callback){
-    const { user_id, post_id } = info; 
-    const query = 'INSERT INTO likes (user_id, post_id , created_at) VALUES (?, ?, NOW())';
-
-    pool.query(query, [ user_id, post_id ],(err, result, fields) => {
-      try{
-        callback(null, { message: "like created success" })
-      }
-      catch{
-        callback(true, { message: 'requires lacking or other error' })
-      }
-    })
+function createLike(info, callback) {
+    const { userid, postid } = info;
+    const query = 'INSERT INTO likes (user_id, post_id, created_at) VALUES (?, ?, NOW())';
+    pool.query(query, [userid, postid], (err, result, fields) => {
+        if (err) {
+            console.error('Error creating like:', err);
+            return callback(new Error('Internal server error'));
+        }
+        callback(null, { message: 'Like created success' });
+    });
 }
 
 function getLikesList(callback){
@@ -34,10 +32,10 @@ function getLikesList(callback){
 function deleteLikes(info, callback) {
     const query = 'DELETE FROM likes WHERE user_id = ? AND post_id = ?';
    
-    pool.query(query, [ info.user_id, info.post_id ], (err, result) => {
+    pool.query(query, [ info.userid, info.postid ], (err, result) => {
         try{
             if (result.affectedRows === 0) {
-                return callback(new Error('No like found with that ID'));
+                return callback(null, new Error('No like found with that ID'));
             }
         
             callback(null, { message: 'like deleted successfully', deletedlikeId: likeId });
@@ -46,7 +44,7 @@ function deleteLikes(info, callback) {
             callback(true, new Error('No like found with that ID'))
         }
     });
-  }
+}
   
 function findLikesByUserId(userId, callback) {
     const query = 'SELECT * FROM likes WHERE user_id = ?';
@@ -57,19 +55,6 @@ function findLikesByUserId(userId, callback) {
         }
         catch{
             callback(true, { message: 'err,not found' })
-        }
-    });
-}
-  
-function findLikesByLikeId(likeId, callback) {
-    const query = 'SELECT * FROM likes WHERE like_id = ?';
-  
-    pool.query(query, [likeId], (err, result) => {
-        try{
-            callback(null, result)
-        }
-        catch{
-            callback(true, { message: 'not found' })
         }
     });
 }
@@ -87,28 +72,22 @@ function findLikesByPostId(postId, callback) {
     });
 }
 
-function isLiked(user_id, post_id, callback){
+function isLiked(user_id, post_id, callback) {
     const checkQuery = 'SELECT * FROM likes WHERE user_id = ? AND post_id = ?';
-      pool.query(checkQuery, [user_id, post_id], (err, results) => {
+    pool.query(checkQuery, [user_id, post_id], (err, results) => {
         if (err) {
             console.error('Error checking like:', err);
-            callback(true,{ message: 'Internal server error' });
+            return callback(new Error('Internal server error'));
         }
-  
-        // 已经点赞过
-        if (results.length > 0) {
-            callback(null, true);
-        }
-
-        callback(null, false);
-      })
-  }
+        
+        callback(null, results.length > 0);
+    });
+}
 
 module.exports = {
     createLike,
     getLikesList,
     deleteLikes,
-    findLikesByLikeId,
     findLikesByPostId,
     findLikesByUserId,
     isLiked,

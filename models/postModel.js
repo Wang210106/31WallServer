@@ -13,10 +13,10 @@ const pool = require('../config/db')
 // );
 
 function createPost(post, callback){
-    const { user_id, title, content, images } = post; 
+    const { userid, title, content, images } = post; 
     const query = 'INSERT INTO posts (user_id, title, content, images, created_at) VALUES (?, ?, ?, ?, NOW())';
 
-    pool.query(query, [ user_id, title, content, JSON.stringify(images) ],(err, result, fields) => {
+    pool.query(query, [ userid, title, content, JSON.stringify(images) ],(err, result, fields) => {
       try{
         callback(null, { message: "post created success" })
       }
