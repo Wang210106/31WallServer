@@ -42,6 +42,18 @@ function createUser(user, callback) {
   });
 }
 
+function updataUser(info, callback) {
+  const { id, openid, nickname, avatar_url, gender } = info;
+  const query = 'UPDATE users SET openid = ?, nickname = ?, avatar_url = ?, gender = ? WHERE id = ?';
+
+  pool.query(query, [ openid, nickname, avatar_url, gender, id ], (error, results, fields) => {
+    if (error)
+      return callback(true, error)
+
+    callback(null, results)
+  })
+}
+
 function deleteUser(openid, callback){
   const query = 'DELETE FROM users WHERE openid = ?'
 
@@ -54,5 +66,6 @@ module.exports = {
   getUserList,
   getUserByOpenId,
   createUser,
+  updataUser,
   deleteUser,
 };

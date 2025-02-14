@@ -75,10 +75,23 @@ function findPostByPostId(userId, callback) {
   });
 }
 
+function search(keyWord, callback) {
+  const query = 'SELECT * FROM posts WHERE title LIKE ? OR content LIkE ?'
+  const key = `%${keyWord}%`
+
+  pool.query(query, [ key, key ], (err, result) => {
+    if (err)
+      return callback(true,null)
+
+    callback(null, { result })
+  })
+}
+
 module.exports = {
     createPost,
     getPostsList,
     deletePost,
     findPostsByUserId,
     findPostByPostId,
+    search
 }

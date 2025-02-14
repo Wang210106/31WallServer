@@ -141,7 +141,7 @@ router.get('/like/userid', (req, res) => {
     const userId = parseInt(req.query.userid, 10); 
    
     if (isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
+        return res.status(400).json({ message: 'Invalid user ID' });
     }
 
     likeModel.findLikesByUserId(userId, (err, result) => {
@@ -150,6 +150,21 @@ router.get('/like/userid', (req, res) => {
         }
     
         res.json({ length:result.length, result });
+    })
+})
+
+router.get('/search', (req, res) => {
+    const keyWord = req.query.key;
+
+    if (!keyWord)
+        return res.status(400).json({ message: 'Keyword Can\'t be Null' });
+    
+    postModel.search(keyWord, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "err!" });
+        }
+    
+        res.json(result);
     })
 })
 
