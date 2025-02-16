@@ -1,7 +1,7 @@
 //commentModel.js
 const pool = require('../config/db')
 
-//comments表
+// comments表
 // CREATE TABLE comments(
 // comments_id INT AUTO_INCREMENT PRIMARY KEY,
 // user_id INT,
