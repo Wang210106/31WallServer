@@ -5,7 +5,9 @@ const pool = require('../config/db')
 // CREATE TABLE IF NOT EXISTS users (
 //   id INT AUTO_INCREMENT PRIMARY KEY,
 //   openid VARCHAR(255) UNIQUE NOT NULL,
-//   nickname VARCHAR(255),
+//   realname VARCHAR(255),
+//   grade INT,
+//   class INT,
 //   avatar_url VARCHAR(255),
 //   gender TINYINT,
 //   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -20,19 +22,39 @@ function getUserList(callback) {
  
 function getUserByOpenId(openid, callback) {
   pool.query('SELECT * FROM users WHERE openid = ?', [openid], (error, results, fields) => {
-    try{
-      callback(null, results.length > 0 ? results[0] : { message: "not found" });
-    }
-    catch{
-      callback(true, -1);
-    }
+    if (error)
+      return callback(true, error)
+
+    callback(null, results.length > 0 ? results[0] : { message: "not found" });
+  });
+}
+
+function getUserByRealname(name , callback) {
+  pool.query('SELECT * FROM users WHERE realname = ?', [ name ], (error, results, fields) => {
+    if (error)
+      return callback(true, error)
+
+    callback(null, results.length > 0 ? results[0] : { message: "not found" });
+  });
+}
+
+function getUserByClass(info , callback) {
+  pool.query('SELECT * FROM users WHERE class = ? AND grade = ?', [ info.class, info.class ], (error, results, fields) => {
+    if (error)
+      return callback(true, error)
+
+    callback(null, results.length > 0 ? results[0] : { message: "not found" });
   });
 }
 
 function createUser(user, callback) {
-  const { openid, nickname, avatar_url, gender } = user;
-  const query = 'INSERT INTO users (openid, nickname, avatar_url, gender, created_at) VALUES (?, ?, ?, ?, NOW())';
-  pool.query(query, [openid, nickname, avatar_url, gender], (error, results, fields) => {
+  const query = `INSERT INTO users 
+          (openid, realname, avatar_url, gender, class, grade, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, NOW())`;
+  
+  pool.query(query, 
+    [user.openid, user.realname, user.avatar_url, user.gender, user.class, user.grade]
+    , (error, results, fields) => {
     try{
       callback(null, results.insertId); // 返回插入的ID
     }
@@ -68,4 +90,6 @@ module.exports = {
   createUser,
   updataUser,
   deleteUser,
+  getUserByClass,
+  getUserByRealname
 };
