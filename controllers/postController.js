@@ -121,6 +121,18 @@ router.get('/like/all', (req, res) => {
     });
 })
 
+router.get('/like/amount', (req, res) => {
+    const postId = req.query.postid
+
+    likeModel.findLikesAmount(postId, (err, result) => {
+        if(err){
+            return res.status(500).json({ message: 'found failed' })
+        }
+
+        res.json(result)
+    })
+})
+
 router.get('/like/postid', (req, res) => {
     const postId = parseInt(req.query.postid, 10); 
    
@@ -233,6 +245,18 @@ router.get('/comment/userid', (req, res) => {
         }
     
         res.json({ length:result.length, result });
+    })
+})
+
+router.get('/comment/amount', (req, res) => {
+    const postId = req.query.postid
+
+    commentModel.findLikesAmount(postId, (err, result) => {
+        if(err){
+            return res.status(500).json({ message: 'found failed' })
+        }
+
+        res.json(result)
     })
 })
 

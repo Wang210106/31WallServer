@@ -7,8 +7,8 @@ const pool = require('../config/db')
 // user_id INT,
 // post_id INT,
 // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-// FOREIGN KEY (user_id) REFERENCES users(id),
-// FOREIGN KEY (post_id) REFERENCES posts(post_id)
+// FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+// FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 // );
 
 function createLike(info, callback) {
@@ -59,6 +59,19 @@ function findLikesByUserId(userId, callback) {
     });
 }
 
+function findLikesAmount(postId, callback) {
+    const query = 'SELECT COUNT(*) FROM likes WHERE post_id = ?';
+  
+    pool.query(query, [postId], (err, result) => {
+        try{
+            callback(null, result)
+        }
+        catch{
+            callback(true, { message: 'err,not found' })
+        }
+    });
+}
+
 function findLikesByPostId(postId, callback) {
     const query = 'SELECT * FROM likes WHERE post_id = ?';
   
@@ -91,4 +104,5 @@ module.exports = {
     findLikesByPostId,
     findLikesByUserId,
     isLiked,
+    findLikesAmount,
 };

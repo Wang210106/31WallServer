@@ -9,7 +9,7 @@ const pool = require('../config/db')
 // content text,
 // images text,
 // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-// foreign key (user_id) references users(id)
+// foreign key (user_id) references users(id) ON DELETE CASCADE
 // );
 
 function createPost(post, callback){

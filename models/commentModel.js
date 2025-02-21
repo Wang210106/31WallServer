@@ -8,8 +8,8 @@ const pool = require('../config/db')
 // post_id INT,
 // comment TEXT,
 // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-// FOREIGN KEY (user_id) REFERENCES users(id),
-// FOREIGN KEY (post_id) REFERENCES posts(post_id)
+// FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+// FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 // );
 
 function createComment(info, callback) {
@@ -58,6 +58,17 @@ function findCommentsByUserId(userId, callback) {
             callback(true, { message: 'err,not found' })
         }
     });
+}
+
+function findLikesAmount(postId, callback){
+    const query = 'SELECT COUNT(*) FROM likes WHERE post_id = ?'
+
+    pool.query(query, [postId], (err, result) => {
+        if (err) 
+            callback(true, err)
+
+        callback(null, result)
+    })
 }
 
 function findCommentsByPostId(postId, callback) {
