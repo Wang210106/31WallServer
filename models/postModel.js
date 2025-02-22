@@ -27,11 +27,9 @@ function createPost(post, callback){
 }
 
 function getPostsList(callback){
-  console.log('getting')
-
   pool.query('SELECT * FROM posts', (err, result, fields) => {
     console.log(err,result)
-    callback(null, res);
+    callback(null, result);
   });
 }
 
