@@ -74,6 +74,8 @@ const info = {
 
 // 获取用户列表的路由
 router.get('/all', (req, res) => {
+  console.log(req.headers)
+
   userModel.getUserList((error, users) => {
     if (error) {
       return res.status(500).json({ message: 'Internal Server Error caused by YOU' });
