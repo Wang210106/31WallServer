@@ -6,6 +6,7 @@ const pool = require('../config/db')
 //   id INT AUTO_INCREMENT PRIMARY KEY,
 //   openid VARCHAR(255) UNIQUE NOT NULL,
 //   realname VARCHAR(255),
+//   nickname VARCHAR(255),
 //   grade INT,
 //   class INT,
 //   avatar_url VARCHAR(255),
@@ -58,11 +59,11 @@ function getUserByClass(info , callback) {
 
 function createUser(user, callback) {
   const query = `INSERT INTO users 
-          (openid, realname, avatar_url, gender, class, grade, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, NOW())`;
+          (openid, realname, nickname, avatar_url, gender, class, grade, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`;
   
   pool.query(query, 
-    [user.openid, user.realname, user.avatar_url, user.gender, user.class, user.grade]
+    [user.openid, user.realname, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
     , (error, results, fields) => {
     try{
       callback(null, results.insertId); // 返回插入的ID
