@@ -101,5 +101,5 @@ module.exports = {
   deleteUser,
   getUserByClass,
   getUserByRealname,
-  getUserByUserId,
+  getUserByUserId
 };
