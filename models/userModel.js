@@ -100,5 +100,6 @@ module.exports = {
   updataUser,
   deleteUser,
   getUserByClass,
-  getUserByRealname
+  getUserByRealname,
+  getUserByUserId,
 };
