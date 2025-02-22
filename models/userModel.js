@@ -29,6 +29,15 @@ function getUserByOpenId(openid, callback) {
   });
 }
 
+function getUserByUserId(userid, callback) {
+  pool.query('SELECT * FROM users WHERE id = ?', [userid], (error, results, fields) => {
+    if (error)
+      return callback(true, error)
+
+    callback(null, results.length > 0 ? results[0] : { message: "not found" });
+  });
+}
+
 function getUserByRealname(name , callback) {
   pool.query('SELECT * FROM users WHERE realname = ?', [ name ], (error, results, fields) => {
     if (error)

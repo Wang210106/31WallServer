@@ -30,6 +30,19 @@ router.get("/", (req, res) => {
   })
 })
 
+//findByUserid
+router.get("/userid", (req, res) => {
+  const userid = req.query.userid;
+  
+  userModel.getUserByOpenId(userid, (err, result) => {
+    if (err){
+      return res.status(404).json({ message: "User not Found!" })
+    }
+
+    res.json(result)
+  })
+})
+
 //findByRealname
 router.get("/realname", (req, res) => {
   const realname = req.query.realname;
