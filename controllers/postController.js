@@ -251,7 +251,7 @@ router.get('/comment/userid', (req, res) => {
 router.get('/comment/amount', (req, res) => {
     const postId = req.query.postid
 
-    commentModel.findLikesAmount(postId, (err, result) => {
+    commentModel.findCommentsAmount(postId, (err, result) => {
         if(err){
             return res.status(500).json({ message: 'found failed' })
         }

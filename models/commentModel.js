@@ -60,8 +60,8 @@ function findCommentsByUserId(userId, callback) {
     });
 }
 
-function findLikesAmount(postId, callback){
-    const query = 'SELECT COUNT(*) FROM likes WHERE post_id = ?'
+function findCommentsAmount(postId, callback){
+    const query = 'SELECT COUNT(*) FROM comments WHERE post_id = ?'
 
     pool.query(query, [postId], (err, result) => {
         if (err) 
@@ -90,4 +90,5 @@ module.exports = {
     deleteComments,
     findCommentsByPostId,
     findCommentsByUserId,
+    findCommentsAmount,
 };
