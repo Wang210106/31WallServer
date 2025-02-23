@@ -61,9 +61,9 @@ function createUser(user, callback) {
   const query = `INSERT INTO users 
           (openid, realname, nickname, avatar_url, gender, class, grade, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`;
-  console.log('model',user.realname)
+
   pool.query(query, 
-    [user.openid, user.realname, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
+    [user.openid, user.realName, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
     , (error, results, fields) => {
     try{
       callback(null, results.insertId); // 返回插入的ID

@@ -19,7 +19,6 @@ router.post('/', (req, res) => {
     return res.status(500).json({ message: 'Has Signed' , info: hasSigned});
   }
 
-  console.log('model',newUser)
   userModel.createUser(newUser, (error, userId) => {
     if (error) {
       return res.status(500).json({ message: 'Can\'t create user!' });
