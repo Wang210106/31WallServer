@@ -7,6 +7,12 @@ const userModel = require('../models/userModel');
 router.post('/', (req, res) => {
   const newUser = { ...req.body, openid: req.headers['x-wx-openid'] }; 
 
+  userModel.getUserByOpenId(newUser.openid, (err, result) => {
+    if (error || result.message == "not found") {
+      return res.status(500).json({ message: 'Can\'t create user!' });
+    }
+  })
+
   userModel.createUser(newUser, (error, userId) => {
     if (error) {
       return res.status(500).json({ message: 'Can\'t create user!' });
