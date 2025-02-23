@@ -12,20 +12,17 @@ const pool = require('../config/db')
 // foreign key (user_id) references users(id) ON DELETE CASCADE
 // );
 
-function createPost(post, callback){
-    const { userid, title, content, images, realname } = post; 
-    const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+function createPost(post, callback) {
+  const { userid, title, content, images, realname } = post;
+  const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
 
-    pool.query(query, [ userid, title, content, JSON.stringify(images), realname ],(err, result, fields) => {
-      try{
-        callback(null, { message: "post created success" , result})
+  pool.query(query, [userid, title, content, JSON.stringify(images), realname], (err, result, fields) => {
+      if (err) {
+          return callback(new Error('Database query failed or input data is invalid'));
       }
-      catch{
-        callback(true, { message: 'requires lacking or other error' })
-      }
-    })
+      callback(null, { message: "Post created successfully", result });
+  });
 }
-
 function getPostsList(callback){
   pool.query('SELECT * FROM posts', (err, result, fields) => {
     callback(null, result);
