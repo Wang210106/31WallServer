@@ -5,7 +5,7 @@ const userModel = require('../models/userModel');
  
 //創建用戶
 router.post('/', (req, res) => {
-  const newUser = req.body; 
+  const newUser = { ...req.body, openid: req.headers['x-wx-openid'] }; 
 
   userModel.createUser(newUser, (error, userId) => {
     if (error) {
@@ -74,8 +74,6 @@ const info = {
 
 // 获取用户列表的路由
 router.get('/all', (req, res) => {
-  console.log(req.headers)
-
   userModel.getUserList((error, users) => {
     if (error) {
       return res.status(500).json({ message: 'Internal Server Error caused by YOU' });
