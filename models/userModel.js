@@ -26,6 +26,8 @@ function getUserByOpenId(openid, callback) {
     if (error)
       return callback(true, error)
 
+    console.log('model'+openid+results)
+
     callback(null, results.length > 0 ? results[0] : { message: "not found" });
   });
 }

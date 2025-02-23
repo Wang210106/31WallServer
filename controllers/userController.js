@@ -32,6 +32,7 @@ router.post('/', (req, res) => {
 //findByOpenid
 router.get("/", (req, res) => {
   const openid = req.query.openid || req.headers['x-wx-openid'];
+  console.log(openid+"chebailefenge"+req.headers['x-wx-openid'])
   
   userModel.getUserByOpenId(openid, (err, result) => {
     if (err){
