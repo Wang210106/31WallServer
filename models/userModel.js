@@ -75,10 +75,16 @@ function createUser(user, callback) {
 }
 
 function updataUser(info, callback) {
-  const { id, openid, nickname, avatar_url, gender } = info;
-  const query = 'UPDATE users SET openid = ?, nickname = ?, avatar_url = ?, gender = ? WHERE id = ?';
+  const { openid } = info;
+  delete info.openid
 
-  pool.query(query, [ openid, nickname, avatar_url, gender, id ], (error, results, fields) => {
+  const setClause = Object.keys(info)
+      .map(key => `${mysql.escapeId(key)} = ${mysql.escape(info[key])}`)
+      .join(', ');
+
+  const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
+
+  pool.query(query, [ openid ], (error, results, fields) => {
     if (error)
       return callback(true, error)
 
