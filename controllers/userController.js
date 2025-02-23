@@ -7,11 +7,17 @@ const userModel = require('../models/userModel');
 router.post('/', (req, res) => {
   const newUser = { ...req.body, openid: req.headers['x-wx-openid'] }; 
 
+  let hasSigned = false
+
   userModel.getUserByOpenId(newUser.openid, (err, result) => {
     if (err || result.message == "not found") {
-      return res.status(500).json({ message: 'Can\'t create user!' });
+      hasSigned = result
     }
   })
+
+  if (hasSigned){
+    return res.status(500).json({ message: 'Has Signed' , info: hasSigned});
+  }
 
   console.log('model',newUser)
   userModel.createUser(newUser, (error, userId) => {
