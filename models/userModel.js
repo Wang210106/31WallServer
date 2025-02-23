@@ -61,7 +61,7 @@ function createUser(user, callback) {
   const query = `INSERT INTO users 
           (openid, realname, nickname, avatar_url, gender, class, grade, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`;
-  
+  console.log('model',user.realname)
   pool.query(query, 
     [user.openid, user.realname, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
     , (error, results, fields) => {
@@ -78,9 +78,7 @@ function updataUser(info, callback) {
   const { openid } = info;
   delete info.openid
 
-  const setClause = Object.keys(info)
-      .map(key => `${mysql.escapeId(key)} = ${mysql.escape(info[key])}`)
-      .join(', ');
+  const setClause = Object.keys(obj).map(key => `${key} = '${obj[key]}'`).join(', ');
 
   const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
 

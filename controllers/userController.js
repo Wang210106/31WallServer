@@ -13,6 +13,7 @@ router.post('/', (req, res) => {
     }
   })
 
+  console.log('model',newUser)
   userModel.createUser(newUser, (error, userId) => {
     if (error) {
       return res.status(500).json({ message: 'Can\'t create user!' });
@@ -90,16 +91,7 @@ router.get('/all', (req, res) => {
 
 //更改
 router.post('/update', (req, res) => {
-  const info = {
-    id : req.body.id,
-    realname : req.body.realname,
-    class: req.body.class,
-    grade: req.body.grade,
-    openid : req.body.openid,
-    avatar_url : req.body.avatar_url,
-    gender : req.body.gender,
-  }
-
+  const info = req.body
   userModel.updataUser(info, (error, result) => {
     if (error)
       return res.status(401).json({ error });
