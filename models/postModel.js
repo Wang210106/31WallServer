@@ -13,10 +13,10 @@ const pool = require('../config/db')
 // );
 
 function createPost(post, callback){
-    const { userid, title, content, images } = post; 
-    const query = 'INSERT INTO posts (user_id, title, content, images, created_at) VALUES (?, ?, ?, ?, NOW())';
+    const { userid, title, content, images, realname } = post; 
+    const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, NOW())';
 
-    pool.query(query, [ userid, title, content, JSON.stringify(images) ],(err, result, fields) => {
+    pool.query(query, [ userid, title, content, JSON.stringify(images), realname ],(err, result, fields) => {
       try{
         callback(null, { message: "post created success" })
       }
@@ -28,7 +28,6 @@ function createPost(post, callback){
 
 function getPostsList(callback){
   pool.query('SELECT * FROM posts', (err, result, fields) => {
-    console.log(err,result)
     callback(null, result);
   });
 }
