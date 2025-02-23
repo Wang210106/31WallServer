@@ -14,11 +14,11 @@ const pool = require('../config/db')
 
 function createPost(post, callback){
     const { userid, title, content, images, realname } = post; 
-    const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, NOW())';
+    const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
 
     pool.query(query, [ userid, title, content, JSON.stringify(images), realname ],(err, result, fields) => {
       try{
-        callback(null, { message: "post created success" })
+        callback(null, { message: "post created success" , result})
       }
       catch{
         callback(true, { message: 'requires lacking or other error' })
