@@ -8,7 +8,7 @@ router.post('/', (req, res) => {
   const newUser = { ...req.body, openid: req.headers['x-wx-openid'] }; 
 
   userModel.getUserByOpenId(newUser.openid, (err, result) => {
-    if (error || result.message == "not found") {
+    if (err || result.message == "not found") {
       return res.status(500).json({ message: 'Can\'t create user!' });
     }
   })
