@@ -16,15 +16,23 @@ router.post('/', (req, res) => {
     })
 })
 
-let allPosts = new Object();
+let allPosts = [];
 const chunkSize = 20
 
-getAllPosts()
+router.get('/all', (req, res) => {
+    const page = req.body.page
 
-function getAllPosts(){
+    if(allPosts.length > 0){
+        if (page > allPosts.length - 1){
+            return res.status(404).json({ message : 'no more message' })
+        }
+    
+        return res.json(allPosts[page])
+    }
+
     postModel.getPostsList((error, posts) => {
         if (error) {
-            setTimeout(getAllPosts, 5000)
+            return res.status(500).json({ message : 'Internal error' })
         }
 
         const chunks = [];
@@ -36,17 +44,12 @@ function getAllPosts(){
 
         allPosts = chunks
     });
-}
-
-
-router.get('/all', (req, res) => {
-    const page = req.body.page
 
     if (page > allPosts.length - 1){
         return res.status(404).json({ message : 'no more message' })
     }
 
-    res.json(allPosts[page])
+    return res.json(allPosts[page])
 })
 
 router.delete('/', (req, res) => {
