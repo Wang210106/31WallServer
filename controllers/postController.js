@@ -38,7 +38,7 @@ router.get('/all', (req, res) => {
         const chunks = [];
 
         for (let i = 0; i < posts.length; i += chunkSize) {
-            const chunk = array.slice(i, i + chunkSize);
+            const chunk = posts.slice(i, i + chunkSize);
             chunks.push(chunk);
         }
 
