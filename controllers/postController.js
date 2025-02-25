@@ -16,14 +16,37 @@ router.post('/', (req, res) => {
     })
 })
 
-router.get('/all', (req, res) => {
+let allPosts = new Object();
+const chunkSize = 20
+
+getAllPosts()
+
+function getAllPosts(){
     postModel.getPostsList((error, posts) => {
         if (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            setTimeout(getAllPosts, 5000)
         }
 
-        res.json(posts);
+        const chunks = [];
+
+        for (let i = 0; i < posts.length; i += chunkSize) {
+            const chunk = array.slice(i, i + chunkSize);
+            chunks.push(chunk);
+        }
+
+        allPosts = chunks
     });
+}
+
+
+router.get('/all', (req, res) => {
+    const page = req.body.page
+
+    if (page > allPosts.length - 1){
+        return res.status(404).json({ message : 'no more message' })
+    }
+
+    res.json(allPosts[page])
 })
 
 router.delete('/', (req, res) => {
