@@ -12,10 +12,10 @@ const pool = require('../config/db')
 // FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 // );
 
-function createComment(info, callback) {
-    const { user_id, post_id, comment } = info;
+function createComment(userid, callback) {
+    const { userid, postid, comment } = info;
     const query = 'INSERT INTO comments (user_id, post_id, comment, created_at) VALUES (?, ?, ?, NOW())';
-    pool.query(query, [user_id, post_id, comment], (err, result, fields) => {
+    pool.query(query, [userid, postid, comment], (err, result, fields) => {
         if (err) {
             console.error('Error creating comment:', err);
             return callback(new Error('Internal server error'));

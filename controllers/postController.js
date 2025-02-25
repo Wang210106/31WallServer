@@ -69,7 +69,7 @@ router.get('/', (req, res) => {
             return res.status(500).json({ message: "not found" });
         }
        
-        res.json({ message: 'Post deleted successfully', result });
+        res.json({ result });
     })
 })
 
