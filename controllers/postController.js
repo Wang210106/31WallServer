@@ -197,8 +197,9 @@ router.get('/search', (req, res) => {
 
 //评论
 router.post('/comment', (req, res) => {
-    const { userid, postid, comment } = req.body;
- 
+    const { userid, postid, comment, anonymous } = req.body;
+    console.log('controller'+userid)
+
     if (!userid || !postid) {
         return res.status(400).json({ error: 'user_id and post_id are required' });
     }

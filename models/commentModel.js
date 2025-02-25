@@ -14,6 +14,8 @@ const pool = require('../config/db')
 
 function createComment(userid, callback) {
     const { userid, postid, comment } = info;
+    console.log('Model'+userid)
+
     const query = 'INSERT INTO comments (user_id, post_id, comment, created_at) VALUES (?, ?, ?, NOW())';
     pool.query(query, [userid, postid, comment], (err, result, fields) => {
         if (err) {
