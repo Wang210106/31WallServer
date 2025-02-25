@@ -16,41 +16,42 @@ router.post('/', (req, res) => {
     })
 })
 
-let allPosts = [];
-const chunkSize = 20
-
+let allPostsChunks = []; 
+const chunkSize = 20;
+ 
 router.get('/all', (req, res) => {
-    const page = req.body.page
-
-    if(allPosts.length > 0){
-        if (page > allPosts.length - 1){
-            return res.status(404).json({ message : 'no more message' })
-        }
-    
-        return res.json(allPosts[page])
+    const page = parseInt(req.query.page, 10) || 0; 
+ 
+    // 检查页码是否有效（注意：这里假设页码从 0 开始）
+    if (allPostsChunks.length === 0) {
+        // 如果还没有加载所有帖子，则从数据库获取
+        postModel.getPostsList((error, posts) => {
+            if (error) {
+                return res.status(500).json({ message: 'Internal error' });
+            }
+ 
+            // 分块处理
+            allPostsChunks = [];
+            for (let i = 0; i < posts.length; i += chunkSize) {
+                const chunk = posts.slice(i, i + chunkSize);
+                allPostsChunks.push(chunk);
+            }
+ 
+            // 现在可以安全地访问 allPostsChunks 了
+            getPageOfPosts(page, res);
+        });
+    } else {
+        getPageOfPosts(page, res);
     }
-
-    postModel.getPostsList((error, posts) => {
-        if (error) {
-            return res.status(500).json({ message : 'Internal error' })
-        }
-
-        const chunks = [];
-
-        for (let i = 0; i < posts.length; i += chunkSize) {
-            const chunk = posts.slice(i, i + chunkSize);
-            chunks.push(chunk);
-        }
-
-        allPosts = chunks
-    });
-
-    if (page > allPosts.length - 1){
-        return res.status(404).json({ message : 'no more message' })
+});
+ 
+function getPageOfPosts(page, res) {
+    if (page < 0 || page >= allPostsChunks.length) {
+        return res.status(404).json({ message: 'No more messages' });
     }
-
-    return res.json(allPosts[page])
-})
+ 
+    res.json(allPostsChunks[page]);
+}
 
 router.delete('/', (req, res) => {
     const postId = parseInt(req.query.postid, 10); 
