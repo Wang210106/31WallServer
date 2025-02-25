@@ -198,13 +198,12 @@ router.get('/search', (req, res) => {
 //评论
 router.post('/comment', (req, res) => {
     const { userid, postid, comment, anonymous } = req.body;
-    console.log('controller'+userid)
 
     if (!userid || !postid) {
         return res.status(400).json({ error: 'user_id and post_id are required' });
     }
  
-    commentModel.createComment({ userid, postid, comment }, (err, result) => {
+    commentModel.createComment({ userid, postid, comment, anonymous }, (err, result) => {
         if (err) {
             console.error('Error creating like:', err.message);
             return res.status(500).json({ error: 'Internal server error' });
