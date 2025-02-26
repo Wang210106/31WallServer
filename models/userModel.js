@@ -3,7 +3,7 @@ const pool = require('../config/db')
  
 //users表
 // CREATE TABLE IF NOT EXISTS users (
-//   id INT AUTO_INCREMENT PRIMARY KEY,
+//   userid INT AUTO_INCREMENT PRIMARY KEY,
 //   openid VARCHAR(255) UNIQUE NOT NULL,
 //   realname VARCHAR(255),
 //   nickname VARCHAR(255),
@@ -33,7 +33,7 @@ function getUserByOpenId(openid, callback) {
 }
 
 function getUserByUserId(userid, callback) {
-  pool.query('SELECT * FROM users WHERE id = ?', [userid], (error, results, fields) => {
+  pool.query('SELECT * FROM users WHERE userid = ?', [userid], (error, results, fields) => {
     if (error)
       return callback(true, error)
 
