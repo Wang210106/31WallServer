@@ -26,7 +26,7 @@ router.get('/all', (req, res) => {
             return res.status(500).json({ message: 'Internal error' });
         }
 
-        posts.sort((a, b) => new Date(b.post_time) - new Date(a.post_time));
+        posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // 分块处理
         const allPostsChunks = [];
