@@ -65,7 +65,7 @@ function createUser(user, callback) {
           VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`;
 
   pool.query(query, 
-    [user.openid, user.realName, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
+    [user.openid, user.realname, user.nickname, user.avatar_url, user.gender, user.class, user.grade]
     , (error, results, fields) => {
     try{
       callback(null, results.insertId); // 返回插入的ID
