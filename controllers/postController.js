@@ -9,7 +9,7 @@ router.post('/', (req, res) => {
 
     postModel.createPost(post, (err, result) => {
         if(err){
-            return result.status(400).json({ message: "Created defeated" })
+            return res.status(400).json({ message: "Created defeated" })
         }
 
         res.json(result)
