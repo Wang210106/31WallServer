@@ -26,6 +26,8 @@ router.get('/all', (req, res) => {
             return res.status(500).json({ message: 'Internal error' });
         }
 
+        posts.sort((a, b) => new Date(b.post_time) - new Date(a.post_time));
+
         // 分块处理
         const allPostsChunks = [];
         for (let i = 0; i < posts.length; i += chunkSize) {
