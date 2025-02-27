@@ -64,6 +64,18 @@ router.get('/', (req, res) => {
     })
 })
 
+router.get('/tab', (req ,res) => {
+    const tab = req.query.tab; 
+
+    postModel.searchPostByTab(tab, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "not found" });
+        }
+    
+        res.json(result);
+    })
+})
+
 router.get('/userid', (req, res) => {
     const userId = parseInt(req.query.userid, 10); 
    

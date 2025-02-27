@@ -75,6 +75,19 @@ function findPostByPostId(userId, callback) {
   });
 }
 
+function searchPostByTab(tab, callback) {
+  const query = 'SELECT * FROM posts WHERE tab = ?';
+
+  pool.query(query, [tab], (err, result) => {
+    try{
+      callback(null, result)
+    }
+    catch{
+      callback(true, { message: 'not found' })
+    }
+  });
+}
+
 function search(keyWord, callback) {
   const query = 'SELECT * FROM posts WHERE title LIKE ? OR content LIkE ?'
   const key = `%${keyWord}%`
@@ -93,5 +106,6 @@ module.exports = {
     deletePost,
     findPostsByUserId,
     findPostByPostId,
-    search
+    search,
+    searchPostByTab
 }
