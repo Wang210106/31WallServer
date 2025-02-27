@@ -13,10 +13,10 @@ const pool = require('../config/db')
 // );
 
 function createPost(post, callback) {
-  const { userid, title, content, images, realname } = post;
-  const query = 'INSERT INTO posts (user_id, title, content, images, realname, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+  const { userid, title, content, images, realname, tab } = post;
+  const query = 'INSERT INTO posts (user_id, title, content, images, realname, tab, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())';
 
-  pool.query(query, [userid, title, content, JSON.stringify(images), realname], (err, result, fields) => {
+  pool.query(query, [userid, title, content, JSON.stringify(images), realname, tab], (err, result, fields) => {
       if (err) {
           return callback(new Error('Database query failed or input data is invalid'));
       }
