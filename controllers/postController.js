@@ -7,6 +7,10 @@ const commentModel = require('../models/commentModel');
 router.post('/', (req, res) => {
     const post = req.body;
 
+    if(!post.userid){
+        return res.status(400).json({ message: 'No userid' })
+    }
+
     postModel.createPost(post, (err, result) => {
         if(err){
             return res.status(400).json({ message: "Created defeated", result })
