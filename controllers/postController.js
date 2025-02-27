@@ -15,31 +15,16 @@ router.post('/', (req, res) => {
         res.json(result)
     })
 })
-
-const chunkSize = 20;
  
 router.get('/all', (req, res) => {
     const page = parseInt(req.query.page, 10) || 0; 
  
-    postModel.getPostsList((error, posts) => {
+    postModel.getPostsList(page, (error, posts) => {
         if (error) {
             return res.status(500).json({ message: 'Internal error' });
         }
 
-        posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        // 分块处理
-        const allPostsChunks = [];
-        for (let i = 0; i < posts.length; i += chunkSize) {
-            const chunk = posts.slice(i, i + chunkSize);
-            allPostsChunks.push(chunk);
-        }
-
-        if (page < 0 || page >= allPostsChunks.length) {
-            return res.status(404).json({ message: 'No more messages' });
-        }
-        
-        res.json(allPostsChunks[page]);
+        res.json(posts);
     });
 });
 

@@ -23,8 +23,11 @@ function createPost(post, callback) {
       callback(null, { message: "Post created successfully", result });
   });
 }
-function getPostsList(callback){
-  pool.query('SELECT * FROM posts', (err, result, fields) => {
+
+const chunkSize = 20;
+
+function getPostsList(page, callback){
+  pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [ (page + 1) * chunkSize ], (err, result, fields) => {
     callback(null, result);
   });
 }
