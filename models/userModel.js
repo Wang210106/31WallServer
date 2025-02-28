@@ -81,7 +81,6 @@ function updataUser(info, callback) {
   delete info.openid
 
   const setClause = Object.keys(info).map(key => `${key} = ${info[key]}`).join(', ');
-  console.log(info, setClause)
 
   const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
 
