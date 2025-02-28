@@ -80,11 +80,11 @@ function updataUser(info, callback) {
   const { openid } = info;
   delete info.openid
 
-  const setClause = Object.keys(info).map(key => `${key} = ${info[key]}`).join(', ');
+  const setClause = Object.keys(info).map(key => `${key} = '${info[key]}'`).join(', ');
 
-  const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
+  const query = `UPDATE users SET ${setClause} WHERE openid = ${openid}`;
 
-  pool.query(query, [ openid ], (error, results, fields) => {
+  pool.query(query, (error, results, fields) => {
     if (error)
       return callback(true, error)
 
