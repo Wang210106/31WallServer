@@ -76,21 +76,26 @@ function createUser(user, callback) {
   });
 }
 
-function updataUser(info, callback) {
+function updateUser(info, callback) {
   const { openid } = info;
-  delete info.openid
-
-  const setClause = Object.keys(info).map(key => `${key} = '${info[key]}'`).join(', ');
-
+  delete info.openid;
+ 
+  const setClauses = Object.entries(info).map(([key, value]) => {
+    const escapedValue = typeof value === 'string' ? `'${value.replace(/'/g, "''")}'` : value;
+    return `${key} = ${escapedValue}`;
+  });
+  const setClause = setClauses.join(', ');
+ 
   const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
-  console.log(query)
 
-  pool.query(query, [ openid ], (error, results, fields) => {
-    if (error)
-      return callback(true, error)
+  pool.query(query, [openid], (error, results, fields) => {
+    
+    if (error) {
+      return callback(error);
+    }
 
-    callback(null, results)
-  })
+    callback(null, results);
+  });
 }
 
 function deleteUser(openid, callback){
