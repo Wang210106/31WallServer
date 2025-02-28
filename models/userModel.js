@@ -89,7 +89,7 @@ function updateUser(info, callback) {
   const query = `UPDATE users SET ${setClause} WHERE openid = ?`;
 
   pool.query(query, [openid], (error, results, fields) => {
-    
+
     if (error) {
       return callback(error);
     }
@@ -110,7 +110,7 @@ module.exports = {
   getUserList,
   getUserByOpenId,
   createUser,
-  updataUser,
+  updateUser,
   deleteUser,
   getUserByClass,
   getUserByRealname,
