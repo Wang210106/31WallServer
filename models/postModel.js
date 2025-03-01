@@ -29,8 +29,9 @@ const chunkSize = 20;
 function getPostsList(page, callback){
   pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [ (page + 1) * chunkSize ], (err, result, fields) => {
     callback(null, result);
+    console.log(result)
 
-    const newPosts = result.data.map(ele => {
+    const newPosts = result.map(ele => {
       let likeAmount, commentAmount, userInfo;
 
       pool.query('SELECT COUNT(*) FROM likes WHERE post_id = ?', [ ele.post_id ], (err, result, fields) => {
@@ -48,10 +49,10 @@ function getPostsList(page, callback){
         userInfo = result
       })
 
-      const post = { ...ele , likeAmount, commentAmount, userInfo }
+      return { ...ele , likeAmount, commentAmount, userInfo }
     });
 
-    callback(true, post)
+    callback(true, newPosts)
   });
 }
 
