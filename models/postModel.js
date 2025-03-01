@@ -25,62 +25,62 @@ function createPost(post, callback) {
 }
 
 const chunkSize = 20;
-
+ 
 function getPostsList(page, callback) {
-  const offset = page * chunkSize; 
- 
-  // 查询帖子列表
-  pool.query('SELECT * FROM posts ORDER BY created_at DESC limit ?, ?', [offset, chunkSize], (err, posts) => {
-    if (err) {
-      return callback(err, null);
-    }
-
-    const postsWithDetails = [];
- 
-    posts.forEach((post, index) => {
-      pool.query('SELECT COUNT(*) as likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likesResult) => {
+    const offset = page * chunkSize;
+  
+    // 查询帖子列表
+    pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?, ?', [offset, chunkSize], (err, postsResult) => {
         if (err) {
-          console.error('Error fetching likes for post', post.post_id, err);
-          return; 
+          return callback(true, err);
         }
- 
-        // 查询评论数
-        pool.query('SELECT COUNT(*) as commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentsResult) => {
-          if (err) {
-            console.error('Error fetching comments for post', post.post_id, err);
-            return; 
-          }
- 
-          pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userResult) => {
+    
+        const posts = postsResult.rows || postsResult; // 根据数据库返回的格式调整
+        const postsWithDetails = [];
+        let completedQueries = 0;
+    
+        posts.forEach((post) => {
+          // 查询点赞数
+          pool.query('SELECT COUNT(*) as likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likesResult) => {
             if (err) {
-              console.error('Error fetching user for post', post.post_id, err);
-              return; // 或者你可以跳过这个帖子并继续处理下一个
+              console.error('Error fetching likes for post', post.post_id, err);
+              return callback(true, err);
             }
+    
+            // 查询评论数
+            pool.query('SELECT COUNT(*) as commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentsResult) => {
+              if (err) {
+                console.error('Error fetching comments for post', post.post_id, err);
+                return callback(true, err);
+              }
+    
+              // 查询用户信息
+              pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userInfo) => {
+                if (err) {
+                  console.error('Error fetching user for post', post.post_id, err);
+                  return callback(true, err);
+                }
+    
+                // 构造带有详细信息的帖子对象
+                  const postWithDetails = {
+                    ...post,
+                    likeCount: likesResult.rows[0].likeCount,
+                    commentCount: commentsResult.rows[0].commentCount,
+                    userInfo,
+                  };
 
-            console.log(userResult)
-            const user = userResult.length > 0 ? userResult : null;
- 
-            // 构造带有详细信息的帖子对象
-            const postWithDetails = {
-              ...post,
-              likeCount: likesResult.likeCount,
-              commentCount: commentsResult.commentCount,
-              user
-            };
- 
-            // 将帖子对象添加到结果数组中
-            postsWithDetails[index] = postWithDetails;
- 
-            // 检查是否所有帖子都已处理完毕
-            if (postsWithDetails.length === posts.length) {
-              // 所有帖子都已处理完毕，调用回调函数返回结果
-              callback(null, postsWithDetails);
-            }
+                  postsWithDetails.push(postWithDetails);
+    
+                  completedQueries++;
+                  if (completedQueries === posts.length) {
+                    callback(null, postsWithDetails);
+                  }
+              });
+            });
           });
-        });
       });
+
     });
-  });
 }
 
 function deletePost(postId, callback) {
