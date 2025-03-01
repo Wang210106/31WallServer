@@ -56,7 +56,8 @@ function getPostsList(page, callback) {
               console.error('Error fetching user for post', post.post_id, err);
               return; // 或者你可以跳过这个帖子并继续处理下一个
             }
- 
+
+            console.log(userResult)
             const user = userResult.length > 0 ? userResult : null;
  
             // 构造带有详细信息的帖子对象
