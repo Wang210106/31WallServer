@@ -26,35 +26,55 @@ function createPost(post, callback) {
 
 const chunkSize = 20;
 
-async function getPostsList(page) {
-  const limit = (page + 1) * chunkSize;
+function getPostsList(page, callback) {
+  const limit = (page + 1) * chunkSize; // 确保 chunkSize 在这个函数的作用域内或者作为参数传入
  
-  try {
-    // 获取帖子列表
-    const postsResult = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [limit]);
-    const posts = postsResult[0];
+  pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [limit], (err, postsResult, fields) => {
+    if (err) {
+      return callback(err, null);
+    }
  
-    // 创建一个 Promise 数组，每个 Promise 异步获取帖子的详细信息
-    const promises = posts.map(async ele => {
-      const likeResult = await pool.query('SELECT COUNT(*) AS likeCount FROM likes WHERE post_id = ?', [ele.post_id]);
-      const commentResult = await pool.query('SELECT COUNT(*) AS commentCount FROM comments WHERE post_id = ?', [ele.post_id]);
-      const userResult = await pool.query('SELECT * FROM users WHERE userid = ?', [ele.user_id]);
+    const posts = postsResult;
+    const enhancedPosts = [];
  
-      return {
-        ...ele,
-        likeAmount: likeResult[0].likeCount,
-        commentAmount: commentResult[0].commentCount,
-        userInfo: userResult[0]
-      };
-    });
+    function processPost(index) {
+      if (index >= posts.length) {
+        return callback(null, enhancedPosts);
+      }
  
-    const enhancedPosts = await Promise.all(promises);
+      const post = posts[index];
  
-    return enhancedPosts;
-  } catch (err) {
-    console.error('Error fetching posts:', err);
-    throw err;
-  }
+      pool.query('SELECT COUNT(*) AS likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likeResult, fields) => {
+        if (err) {
+          return callback(err, null);
+        }
+ 
+        pool.query('SELECT COUNT(*) AS commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentResult, fields) => {
+          if (err) {
+            return callback(err, null);
+          }
+ 
+          pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userResult, fields) => {
+            if (err) {
+              return callback(err, null);
+            }
+ 
+            const enhancedPost = {
+              ...post,
+              likeAmount: likeResult[0].likeCount,
+              commentAmount: commentResult[0].commentCount,
+              userInfo: userResult[0]
+            };
+ 
+            enhancedPosts.push(enhancedPost);
+            processPost(index + 1); // 递归调用处理下一个帖子
+          });
+        });
+      });
+    }
+ 
+    processPost(0); // 从第一个帖子开始处理
+  });
 }
 
 function deletePost(postId, callback) {
