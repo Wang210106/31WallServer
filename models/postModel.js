@@ -26,9 +26,59 @@ function createPost(post, callback) {
 
 const chunkSize = 20;
 
-function getPostsList(page, callback){
-  pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [ (page + 1) * chunkSize ], (err, result, fields) => {
-    callback(null, result);
+function getPostsList(page, callback) {
+  const offset = page * chunkSize; 
+ 
+  // 查询帖子列表
+  pool.query('SELECT * FROM posts ORDER BY created_at DESC limit ?, ?', [offset, chunkSize], (err, posts) => {
+    if (err) {
+      return callback(err, null);
+    }
+
+    const postsWithDetails = [];
+ 
+    posts.forEach((post, index) => {
+      pool.query('SELECT COUNT(*) as likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likesResult) => {
+        if (err) {
+          console.error('Error fetching likes for post', post.post_id, err);
+          return; 
+        }
+ 
+        // 查询评论数
+        pool.query('SELECT COUNT(*) as commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentsResult) => {
+          if (err) {
+            console.error('Error fetching comments for post', post.post_id, err);
+            return; 
+          }
+ 
+          pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userResult) => {
+            if (err) {
+              console.error('Error fetching user for post', post.post_id, err);
+              return; // 或者你可以跳过这个帖子并继续处理下一个
+            }
+ 
+            const user = userResult.rows.length > 0 ? userResult.rows[0] : null;
+ 
+            // 构造带有详细信息的帖子对象
+            const postWithDetails = {
+              ...post,
+              likeCount: likesResult.rows[0].likeCount,
+              commentCount: commentsResult.rows[0].commentCount,
+              user
+            };
+ 
+            // 将帖子对象添加到结果数组中
+            postsWithDetails[index] = postWithDetails;
+ 
+            // 检查是否所有帖子都已处理完毕
+            if (postsWithDetails.length === posts.length) {
+              // 所有帖子都已处理完毕，调用回调函数返回结果
+              callback(null, postsWithDetails);
+            }
+          });
+        });
+      });
+    });
   });
 }
 
