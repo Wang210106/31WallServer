@@ -23,13 +23,13 @@ router.post('/', (req, res) => {
 router.get('/all', (req, res) => {
     const page = parseInt(req.query.page, 10) || 0; 
  
-    postModel.getPostsList(page, (error, posts) => {
-        if (error) {
-            return res.status(500).json({ message: 'Internal error' });
-        }
+    postModel.getPostsList(page)
+    .then(result => {
+        res.json(result);
+    }).catch(err => {
+        res.status(500).json({ message: 'Internal error' });
+    })
 
-        res.json(posts);
-    });
 });
 
 router.delete('/', (req, res) => {

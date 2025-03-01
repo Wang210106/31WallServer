@@ -26,34 +26,36 @@ function createPost(post, callback) {
 
 const chunkSize = 20;
 
-function getPostsList(page, callback){
-  pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [ (page + 1) * chunkSize ], (err, result, fields) => {
-    callback(null, result);
-    console.log(result)
-
-    const newPosts = result.map(ele => {
-      let likeAmount, commentAmount, userInfo;
-
-      pool.query('SELECT COUNT(*) FROM likes WHERE post_id = ?', [ ele.post_id ], (err, result, fields) => {
-        console.log('like',result)
-        likeAmount = result.likeCount
-      })
-
-      pool.query('SELECT COUNT(*) FROM comments WHERE post_id = ?', [ ele.post_id ], (err, result, fields) => {
-        console.log('comment',result)
-        commentAmount = result.commentCount
-      })
-
-      pool.query('SELECT * FROM users WHERE userid = ?', [ ele.user_id ], (err, result, fields) => {
-        console.log('user',result)
-        userInfo = result
-      })
-
-      return { ...ele , likeAmount, commentAmount, userInfo }
+async function getPostsList(page) {
+  const chunkSize = 10; // 假设每页显示10条数据，这个值需要根据实际情况设置
+  const limit = (page + 1) * chunkSize;
+ 
+  try {
+    // 获取帖子列表
+    const postsResult = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [limit]);
+    const posts = postsResult[0];
+ 
+    // 创建一个 Promise 数组，每个 Promise 异步获取帖子的详细信息
+    const promises = posts.map(async ele => {
+      const likeResult = await pool.query('SELECT COUNT(*) AS likeCount FROM likes WHERE post_id = ?', [ele.post_id]);
+      const commentResult = await pool.query('SELECT COUNT(*) AS commentCount FROM comments WHERE post_id = ?', [ele.post_id]);
+      const userResult = await pool.query('SELECT * FROM users WHERE userid = ?', [ele.user_id]);
+ 
+      return {
+        ...ele,
+        likeAmount: likeResult[0].likeCount,
+        commentAmount: commentResult[0].commentCount,
+        userInfo: userResult[0]
+      };
     });
-
-    callback(true, newPosts)
-  });
+ 
+    const enhancedPosts = await Promise.all(promises);
+ 
+    return enhancedPosts;
+  } catch (err) {
+    console.error('Error fetching posts:', err);
+    throw err;
+  }
 }
 
 function deletePost(postId, callback) {
