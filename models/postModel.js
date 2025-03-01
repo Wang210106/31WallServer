@@ -25,62 +25,34 @@ function createPost(post, callback) {
 }
 
 const chunkSize = 20;
- 
-function getPostsList(page, callback) {
-    const offset = page * chunkSize;
-  
-    // 查询帖子列表
-    pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?, ?', [offset, chunkSize], (err, postsResult) => {
-        if (err) {
-          return callback(true, err);
-        }
-    
-        const posts = postsResult.rows || postsResult; // 根据数据库返回的格式调整
-        const postsWithDetails = [];
-        let completedQueries = 0;
-    
-        posts.forEach((post) => {
-          // 查询点赞数
-          pool.query('SELECT COUNT(*) as likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likesResult) => {
-            if (err) {
-              console.error('Error fetching likes for post', post.post_id, err);
-              return callback(true, err);
-            }
-    
-            // 查询评论数
-            pool.query('SELECT COUNT(*) as commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentsResult) => {
-              if (err) {
-                console.error('Error fetching comments for post', post.post_id, err);
-                return callback(true, err);
-              }
-    
-              // 查询用户信息
-              pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userInfo) => {
-                if (err) {
-                  console.error('Error fetching user for post', post.post_id, err);
-                  return callback(true, err);
-                }
-    
-                // 构造带有详细信息的帖子对象
-                  const postWithDetails = {
-                    ...post,
-                    likeCount: likesResult.rows[0].likeCount,
-                    commentCount: commentsResult.rows[0].commentCount,
-                    userInfo,
-                  };
 
-                  postsWithDetails.push(postWithDetails);
-    
-                  completedQueries++;
-                  if (completedQueries === posts.length) {
-                    callback(null, postsWithDetails);
-                  }
-              });
-            });
-          });
-      });
+function getPostsList(page, callback){
+  pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ?', [ (page + 1) * chunkSize ], (err, result, fields) => {
+    callback(null, result);
 
+    const newPosts = result.data.map(ele => {
+      let likeAmount, commentAmount, userInfo;
+
+      pool.query('SELECT COUNT(*) FROM likes WHERE post_id = ?', [ ele.post_id ], (err, result, fields) => {
+        console.log('like',result)
+        likeAmount = result.likeCount
+      })
+
+      pool.query('SELECT COUNT(*) FROM comments WHERE post_id = ?', [ ele.post_id ], (err, result, fields) => {
+        console.log('comment',result)
+        commentAmount = result.commentCount
+      })
+
+      pool.query('SELECT * FROM users WHERE userid = ?', [ ele.user_id ], (err, result, fields) => {
+        console.log('user',result)
+        userInfo = result
+      })
+
+      const post = { ...ele , likeAmount, commentAmount, userInfo }
     });
+
+    callback(true, post)
+  });
 }
 
 function deletePost(postId, callback) {
