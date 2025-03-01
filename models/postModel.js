@@ -57,13 +57,13 @@ function getPostsList(page, callback) {
               return; // 或者你可以跳过这个帖子并继续处理下一个
             }
  
-            const user = userResult.rows.length > 0 ? userResult.rows[0] : null;
+            const user = userResult.length > 0 ? userResult : null;
  
             // 构造带有详细信息的帖子对象
             const postWithDetails = {
               ...post,
-              likeCount: likesResult.rows[0].likeCount,
-              commentCount: commentsResult.rows[0].commentCount,
+              likeCount: likesResult.likeCount,
+              commentCount: commentsResult.commentCount,
               user
             };
  
