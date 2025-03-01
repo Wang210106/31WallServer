@@ -27,7 +27,6 @@ function createPost(post, callback) {
 const chunkSize = 20;
 
 async function getPostsList(page) {
-  const chunkSize = 10; // 假设每页显示10条数据，这个值需要根据实际情况设置
   const limit = (page + 1) * chunkSize;
  
   try {
