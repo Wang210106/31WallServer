@@ -96,7 +96,7 @@ router.get('/all', (req, res) => {
 
 //更改
 router.post('/update', (req, res) => {
-  const info = req.body
+  const info = { ...req.body , openid: req.headers['x-wx-openid'] }
   userModel.updateUser(info, (error, result) => {
     if (error)
       return res.status(401).json({ error });
