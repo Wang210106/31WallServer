@@ -20,7 +20,7 @@ function getNotificationsList(callback){
     });
 }
 
-function getNotificationsListById(userid){
+function getNotificationsListById(userid,callback){
     pool.query('SELECT * FROM notifications WHERE userid = ?', [userid], (err, res, fields) => {
       callback(!!err, res);
     });
