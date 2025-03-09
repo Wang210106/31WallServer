@@ -14,6 +14,11 @@ const pool = require('../config/db')
 function createReport(info, callback) {
     const { user_id, type, marked_id , content } = info;
     const query = 'INSERT INTO reports (user_id, type, marked_id, content, created_at) VALUES (?, ?, ?, ?, NOW())';
+
+    if( !user_id || !type || !marked_id || !content ){
+        return callback(true, 'necessarity lost')
+    }
+
     pool.query(query, [user_id, type, marked_id, content], (err, result, fields) => {
         if (err) {
             console.error('Error creating report:', err);

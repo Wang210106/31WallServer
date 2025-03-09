@@ -17,7 +17,7 @@ router.post('/', (req, res) => {
 
   reportModel.createReport(newReport, (err, result) => {
     if (err)
-        return res.status(500).json({ message : 'Created Report Failed' })
+        return res.status(500).json({ message : 'Created Report Failed', result })
 
     res.json(result)
   })
