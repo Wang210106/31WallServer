@@ -3,7 +3,7 @@ const pool = require('../config/db')
 
 function createNotification(info, callback) {
     const { title, userid, content , images } = info;
-    const query = 'INSERT INTO notifications (title, userid, content, images, created_at) VALUES (?, ?, ?, ?, NOW())';
+    const query = 'INSERT INTO notification (title, userid, content, images, created_at) VALUES (?, ?, ?, ?, NOW())';
 
     pool.query(query, [title, userid, content, JSON.stringify(images)], (err, result, fields) => {
         if (err) {
@@ -15,13 +15,13 @@ function createNotification(info, callback) {
 }
 
 function getNotificationsList(callback){
-    pool.query('SELECT * FROM notifications', (err, res, fields) => {
+    pool.query('SELECT * FROM notification', (err, res, fields) => {
       callback(!!err, res);
     });
 }
 
 function getNotificationsListById(userid,callback){
-    pool.query('SELECT * FROM notifications WHERE userid = ?', [userid], (err, res, fields) => {
+    pool.query('SELECT * FROM notification WHERE userid = ?', [userid], (err, res, fields) => {
       callback(!!err, res);
     });
 }
