@@ -15,7 +15,7 @@ function createReport(info, callback) {
     const { user_id, type, marked_id , content } = info;
     const query = 'INSERT INTO reports (user_id, type, marked_id, content, created_at) VALUES (?, ?, ?, ?, NOW())';
 
-    if( !user_id || !type || !marked_id || !content ){
+    if( !user_id || !type || !content ){
         return callback(true, 'necessarity lost')
     }
 
