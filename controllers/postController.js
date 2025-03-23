@@ -183,6 +183,7 @@ router.get('/like/userid', (req, res) => {
     })
 })
 
+//搜索
 router.get('/search', (req, res) => {
     const keyWord = req.query.key;
 
@@ -202,10 +203,10 @@ router.get('/search', (req, res) => {
 router.post('/comment', (req, res) => {
     const { userid, postid, comment, anonymous } = req.body;
 
-    if (!userid || !postid) {
-        return res.status(400).json({ error: 'user_id and post_id are required' });
+    if (!userid) {
+        return res.status(400).json({ error: 'user_id is required' });
     }
- 
+
     commentModel.createComment({ userid, postid, comment, anonymous }, (err, result) => {
         if (err) {
             console.error('Error creating like:', err.message);
