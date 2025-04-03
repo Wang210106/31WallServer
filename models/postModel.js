@@ -125,6 +125,7 @@ function searchPostByTab(data, callback) {
   const query = 'SELECT * FROM posts WHERE tab = ? LIMIT ?';
  
   const limit = (count + 1) * 5;
+  console.log('model', tab, limit)
  
   pool.query(query, [tab, limit], (err, result) => {
     if (err) {
