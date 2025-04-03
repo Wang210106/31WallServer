@@ -199,13 +199,13 @@ router.get('/search', (req, res) => {
     })
 })
 
-router.get('/tag', (req, res) => {
-    const tag = req.query.tag;
+router.get('/tab', (req, res) => {
+    const { tab, page } = req.query;
 
-    if (!tag)
-        return res.status(400).json({ message: 'Tab Can\'t be Null' });
+    if (!tab || !page)
+        return res.status(400).json({ message: 'Tab and page Can\'t be Null' });
     
-    postModel.searchPostByTab(tag, (err, result) => {
+    postModel.searchPostByTab({ tab, count: page, }, (err, result) => {
         if (err) {
             return res.status(500).json({ message: "err!" });
         }

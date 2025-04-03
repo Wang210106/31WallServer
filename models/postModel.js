@@ -120,15 +120,17 @@ function findPostByPostId(userId, callback) {
   });
 }
 
-function searchPostByTab(tab, callback) {
-  const query = 'SELECT * FROM posts WHERE tab = ?';
-
-  pool.query(query, [tab], (err, result) => {
-    try{
-      callback(null, result)
-    }
-    catch{
-      callback(true, { message: 'not found' })
+function searchPostByTab(data, callback) {
+  const { tab, count } = data; 
+  const query = 'SELECT * FROM posts WHERE tab = ? LIMIT ?';
+ 
+  const limit = (count + 1) * 5;
+ 
+  pool.query(query, [tab, limit], (err, result) => {
+    if (err) {
+      callback(true, { message: 'Error querying database' });
+    } else {
+      callback(null, result);
     }
   });
 }
