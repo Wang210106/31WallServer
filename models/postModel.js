@@ -121,18 +121,56 @@ function findPostByPostId(userId, callback) {
 }
 
 function searchPostByTab(data, callback) {
-  const { tab, count } = data; 
-  const query = 'SELECT * FROM posts WHERE tab = ? LIMIT ?';
- 
-  const limit = (count + 1) * 5;
-  console.log('model', tab, limit)
- 
-  pool.query(query, [tab, limit], (err, result) => {
+  const { tab, count } = data;
+  const limit = (count + 1) * 5; // 每页5条
+  
+  console.log('model', tab, limit);
+
+  pool.query('SELECT * FROM posts WHERE tab = ? LIMIT ?', [tab, limit], (err, postsResult, fields) => {
     if (err) {
-      callback(true, { message: 'Error querying database' });
-    } else {
-      callback(null, result)
+      return callback(err, null);
     }
+
+    const posts = postsResult;
+    const enhancedPosts = [];
+
+    function processPost(index) {
+      if (index >= posts.length) {
+        return callback(null, enhancedPosts);
+      }
+
+      const post = posts[index];
+
+      pool.query('SELECT COUNT(*) AS likeCount FROM likes WHERE post_id = ?', [post.post_id], (err, likeResult, fields) => {
+        if (err) {
+          return callback(err, null);
+        }
+
+        pool.query('SELECT COUNT(*) AS commentCount FROM comments WHERE post_id = ?', [post.post_id], (err, commentResult, fields) => {
+          if (err) {
+            return callback(err, null);
+          }
+
+          pool.query('SELECT * FROM users WHERE userid = ?', [post.user_id], (err, userResult, fields) => {
+            if (err) {
+              return callback(err, null);
+            }
+
+            const enhancedPost = {
+              ...post,
+              likeAmount: likeResult[0].likeCount,
+              commentAmount: commentResult[0].commentCount,
+              userInfo: userResult[0]
+            };
+
+            enhancedPosts.push(enhancedPost);
+            processPost(index + 1); // 递归调用处理下一个帖子
+          });
+        });
+      });
+    }
+
+    processPost(0); // 从第一个帖子开始处理
   });
 }
 
