@@ -130,7 +130,7 @@ function searchPostByTab(data, callback) {
     if (err) {
       callback(true, { message: 'Error querying database' });
     } else {
-      callback(null, result);
+      callback(null, result)
     }
   });
 }
