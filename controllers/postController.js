@@ -199,6 +199,21 @@ router.get('/search', (req, res) => {
     })
 })
 
+router.get('/tag', (req, res) => {
+    const tag = req.query.tag;
+
+    if (!tag)
+        return res.status(400).json({ message: 'Tab Can\'t be Null' });
+    
+    postModel.searchPostByTab(tag, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "err!" });
+        }
+    
+        res.json(result);
+    })
+})
+
 //评论
 router.post('/comment', (req, res) => {
     const { userid, postid, comment, anonymous } = req.body;
