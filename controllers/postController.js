@@ -67,7 +67,6 @@ router.get('/', (req, res) => {
 router.get('/tab', (req ,res) => {
     const { tab, page } = req.query; 
 
-    console.log('controller',tab)
     postModel.searchPostByTab({ tab, count: page, }, (err, result) => {
         if (err) {
             return res.status(500).json({ message: "not found" });

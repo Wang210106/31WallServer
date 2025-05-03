@@ -26,8 +26,26 @@ function getNotificationsListById(userid,callback){
     });
 }
 
+function deleteNotifications(id, callback) {
+    const query = 'DELETE FROM notification WHERE noid = ?';
+   
+    pool.query(query, id, (err, result) => {
+        try{
+            if (result.affectedRows === 0) {
+                return callback(null, new Error('No notification found with that ID'));
+            }
+        
+            callback(null, { message: 'report deleted successfully' });
+        }
+        catch{
+            callback(true, new Error('No report found with that ID'))
+        }
+    });
+}
+
 module.exports = {
     createNotification,
     getNotificationsList,
-    getNotificationsListById
+    getNotificationsListById,
+    deleteNotifications
 }

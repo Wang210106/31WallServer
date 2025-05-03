@@ -27,7 +27,7 @@ router.post('/', (req, res) => {
 router.post('/notice', (req, res) => {
   const newNo = req.body; 
 
-  reportModel.createReport(newNo, (err, result) => {
+  notificationModel.createNotification(newNo, (err, result) => {
     if (err)
         return res.status(500).json({ message : 'Created Notification Failed', result })
 
@@ -49,7 +49,7 @@ router.get('/notice', (req, res) => {
 router.delete('/', (req, res) => {
     const report_id = req.query.id
 
-  reportModel.deleteReports(report_id, (err, result) => {
+  notificationModel.deleteNotifications(report_id, (err, result) => {
     if (err) {
       return res.status(400).json({ message: 'Can\'nt delete' });
     }

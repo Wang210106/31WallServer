@@ -124,8 +124,6 @@ function searchPostByTab(data, callback) {
   const { tab, count } = data;
   const limit = (count + 1) * 5; // 每页5条
   
-  console.log('model', tab, limit);
-
   pool.query('SELECT * FROM posts WHERE tab = ? LIMIT ?', [tab, limit], (err, postsResult, fields) => {
     if (err) {
       return callback(err, null);
