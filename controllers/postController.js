@@ -286,7 +286,7 @@ router.get('/comment/all', (req, res) => {
 
 router.get('/comment/postid', (req, res) => {
     const postId = parseInt(req.query.postid, 10); 
-    const userId = parseInt(req.query.userId, 10); 
+    const userId = parseInt(req.query.userid, 10); 
    
     if (isNaN(postId)) {
       return res.status(400).json({ message: 'Invalid post ID' });
@@ -307,16 +307,15 @@ router.get('/comment/postid', (req, res) => {
 
                 //这层是看是否点赞过的
                 likeModel.isCommentLiked(userId, element.comments_id, (err, isRes) => {
-                    console.log(cres)
+
                     result[i].likes_count = cres[0]['COUNT(*)']
                     result[i].isLiked = isRes
+
+                    res.json({ length:result.length, result });
                 })
                 
             })
         }
-        
-
-        res.json({ length:result.length, result });
     })
 })
 
