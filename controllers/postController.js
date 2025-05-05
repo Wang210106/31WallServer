@@ -186,6 +186,34 @@ router.get('/like/userid', (req, res) => {
 //评论的点赞
 
 router.post('/commentLike', (req, res) => {
+    const userid = parseInt(req.query.userid, 10); 
+    const commentid = parseInt(req.query.commentid, 10); 
+
+    likeModel.isCommentLiked(userid, commentid, (err, isRes) => {
+        if (err) {
+            return res.status(500).json({ message: "create wrongly" });
+        }
+
+        //已经点赞过
+        if (isRes){
+            likeModel.deleteCommentLikes({ userid, commentid }, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: "delete wrongly" });
+                }
+
+                res.json({result : 'delete commentLike successfully'})
+            })
+        }
+        else{
+            likeModel.createCommentLike({ userid, commentid }, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: "create wrongly" });
+                }
+
+                res.json({result : 'create commentLike successfully'})
+            })
+        }
+    })
     
 })
 
@@ -258,11 +286,13 @@ router.get('/comment/all', (req, res) => {
 
 router.get('/comment/postid', (req, res) => {
     const postId = parseInt(req.query.postid, 10); 
+    const userId = parseInt(req.query.userId, 10); 
    
     if (isNaN(postId)) {
       return res.status(400).json({ message: 'Invalid post ID' });
     }
 
+    //回调地狱还不能用promise啊啊啊
     commentModel.findCommentsByPostId(postId, (err, result) => {
         if (err) {
             return ;
@@ -271,11 +301,17 @@ router.get('/comment/postid', (req, res) => {
         for (let i = 0; i < result.length; i++) {
             const element = result[i];
 
+            //第二层是看点赞数量的
             likeModel.findCommentsLikesAmount(element.comments_id,(err, cres) => {
                 if (err) return res.status(500).json({ message: "wrong id" })
 
-                console.log(cres)
-                result[i].likes_count = cres[0]['COUNT(*)']
+                //这层是看是否点赞过的
+                likeModel.isCommentLiked(userId, comments_id, (err, isRes) => {
+                    console.log(cres)
+                    result[i].likes_count = cres[0]['COUNT(*)']
+                    result[i].isLiked = isRes
+                })
+                
             })
         }
         
