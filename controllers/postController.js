@@ -183,6 +183,12 @@ router.get('/like/userid', (req, res) => {
     })
 })
 
+//评论的点赞
+
+router.post('/commentLike', (req, res) => {
+    
+})
+
 //搜索
 router.get('/search', (req, res) => {
     const keyWord = req.query.key;
@@ -259,9 +265,21 @@ router.get('/comment/postid', (req, res) => {
 
     commentModel.findCommentsByPostId(postId, (err, result) => {
         if (err) {
-            return res.status(500).json({ message: "not found" });
+            return ;
         }
     
+        for (let i = 0; i < result.length; i++) {
+            const element = result[i];
+
+            likeModel.findCommentsLikesAmount(element.comments_id,(err, cres) => {
+                if (err) return res.status(500).json({ message: "wrong id" })
+
+                console.log(cres)
+                result[i].likes_count = cres[0]['COUNT(*)']
+            })
+        }
+        
+
         res.json({ length:result.length, result });
     })
 })
