@@ -306,7 +306,7 @@ router.get('/comment/postid', (req, res) => {
                 if (err) return res.status(500).json({ message: "wrong id" })
 
                 //这层是看是否点赞过的
-                likeModel.isCommentLiked(userId, comments_id, (err, isRes) => {
+                likeModel.isCommentLiked(userId, element.comments_id, (err, isRes) => {
                     console.log(cres)
                     result[i].likes_count = cres[0]['COUNT(*)']
                     result[i].isLiked = isRes
