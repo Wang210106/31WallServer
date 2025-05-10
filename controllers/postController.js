@@ -285,39 +285,55 @@ router.get('/comment/all', (req, res) => {
 })
 
 router.get('/comment/postid', (req, res) => {
-    const postId = parseInt(req.query.postid, 10); 
-    const userId = parseInt(req.query.userid, 10); 
-   
+    const postId = parseInt(req.query.postid, 10);
+    const userId = parseInt(req.query.userid, 10);
+
     if (isNaN(postId)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
+        return res.status(400).json({ message: 'Invalid post ID' });
     }
 
-    //回调地狱还不能用promise啊啊啊
     commentModel.findCommentsByPostId(postId, (err, result) => {
         if (err) {
-            return ;
+            return res.status(500).json({ message: 'Database error' });
         }
-    
-        for (let i = 0; i < result.length; i++) {
-            const element = result[i];
 
-            //第二层是看点赞数量的
-            likeModel.findCommentsLikesAmount(element.comments_id,(err, cres) => {
-                if (err) return res.status(500).json({ message: "wrong id" })
+        if (result.length === 0) {
+            return res.json({ length: 0, result: [] });
+        }
 
-                //这层是看是否点赞过的
+        let processed = 0;
+        const total = result.length;
+        let hasError = false;
+
+        result.forEach((element, index) => {
+            likeModel.findCommentsLikesAmount(element.comments_id, (err, cres) => {
+                if (hasError) return;
+                if (err) {
+                    hasError = true;
+                    return res.status(500).json({ message: 'Error fetching likes count' });
+                }
+
                 likeModel.isCommentLiked(userId, element.comments_id, (err, isRes) => {
+                    if (hasError) return;
+                    if (err) {
+                        hasError = true;
+                        return res.status(500).json({ message: 'Error checking like status' });
+                    }
 
-                    result[i].likes_count = cres[0]['COUNT(*)']
-                    result[i].isLiked = isRes
+                    // 更新当前评论的点赞数和点赞状态
+                    result[index].likes_count = cres[0]['COUNT(*)'];
+                    result[index].isLiked = isRes;
 
-                    res.json({ length:result.length, result });
-                })
-                
-            })
-        }
-    })
-})
+                    // 检查是否所有评论处理完成
+                    processed++;
+                    if (processed === total) {
+                        res.json({ length: total, result });
+                    }
+                });
+            });
+        });
+    });
+});
 
 router.get('/comment/userid', (req, res) => {
     const userId = parseInt(req.query.userid, 10); 
