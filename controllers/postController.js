@@ -252,8 +252,8 @@ router.get('/tab', (req, res) => {
 router.post('/comment', (req, res) => {
     const { userid, postid, comment, anonymous } = req.body;
 
-    if (!userid) {
-        return res.status(400).json({ error: 'user_id is required' });
+    if (!userid || !postid) {
+        return res.status(400).json({ error: 'user_id and post_id are required' });
     }
 
     commentModel.createComment({ userid, postid, comment, anonymous }, (err, result) => {

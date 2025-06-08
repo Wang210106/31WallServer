@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const likeModel = require('../models/likeModel');
+const commentModel = require('../models/commentModel');
 
 //评论的点赞
 
