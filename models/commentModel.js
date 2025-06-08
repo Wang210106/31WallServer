@@ -1,17 +1,7 @@
 //commentModel.js
 const pool = require('../config/db')
 
-// comments表
-// CREATE TABLE comments(
-// comments_id INT AUTO_INCREMENT PRIMARY KEY,
-// user_id INT,
-// post_id INT,
-// comment TEXT,
-// created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-// FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-// FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
-// );
-
+//帖子评论
 function createComment(info, callback) {
     const { userid, postid, comment, anonymous } = info;
 
@@ -85,6 +75,21 @@ function findCommentsByPostId(postId, callback) {
     });
 }
 
+//回复
+
+function createReply(info, callback) {
+    const { userid, postid, parentid , comment, anonymous } = info;
+
+    const query = 'INSERT INTO comments (user_id, post_id, parent_id , comment, anonymous, created_at) VALUES (?, ?, ?, ?, NOW())';
+    pool.query(query, [userid, postid, parentid, comment, anonymous], (err, result, fields) => {
+        if (err) {
+            console.error('Error creating comment:', err);
+            return callback(new Error('Internal server error'));
+        }
+        callback(null, { message: 'Comment created success' , comment_id: result.insertId });
+    });
+}
+
 module.exports = {
     createComment,
     getCommentsList,
@@ -92,4 +97,5 @@ module.exports = {
     findCommentsByPostId,
     findCommentsByUserId,
     findCommentsAmount,
+    createReply,
 };

@@ -287,49 +287,110 @@ router.get('/comment/all', (req, res) => {
 router.get('/comment/postid', (req, res) => {
     const postId = parseInt(req.query.postid, 10);
     const userId = parseInt(req.query.userid, 10);
-
+ 
     if (isNaN(postId)) {
         return res.status(400).json({ message: 'Invalid post ID' });
     }
-
-    commentModel.findCommentsByPostId(postId, (err, result) => {
+ 
+    commentModel.findCommentsByPostId(postId, (err, comments) => {
         if (err) {
             return res.status(500).json({ message: 'Database error' });
         }
-
-        if (result.length === 0) {
+ 
+        if (comments.length === 0) {
             return res.json({ length: 0, result: [] });
         }
-
-        let processed = 0;
-        const total = result.length;
-        let hasError = false;
-
-        result.forEach((element, index) => {
-            likeModel.findCommentsLikesAmount(element.comments_id, (err, cres) => {
-                if (hasError) return;
-                if (err) {
-                    hasError = true;
-                    return res.status(500).json({ message: 'Error fetching likes count' });
+ 
+        // 创建评论ID到评论对象的映射
+        const commentMap = {};
+        // 存储没有父评论的顶级评论
+        const topLevelComments = [];
+ 
+        // 首先将所有评论存入映射表
+        comments.forEach(comment => {
+            commentMap[comment.comments_id] = {
+                ...comment,
+                replies: [] // 初始化回复数组
+            };
+        });
+ 
+        // 构建评论树结构
+        comments.forEach(comment => {
+            if (comment.parent_id) {
+                // 次级评论
+                const parentComment = commentMap[comment.parent_id];
+                if (parentComment) {
+                    parentComment.replies.push(commentMap[comment.comments_id]);
+                } else {
+                    // 顶级评论
+                    topLevelComments.push(commentMap[comment.comments_id]);
                 }
-
-                likeModel.isCommentLiked(userId, element.comments_id, (err, isRes) => {
+            } else {
+                // 顶级评论
+                topLevelComments.push(commentMap[comment.comments_id]);
+            }
+        });
+ 
+        // 处理点赞信息的函数
+        const processLikes = (commentArray, callback) => {
+            let processed = 0;
+            const total = commentArray.length;
+            let hasError = false;
+ 
+            if (total === 0) return callback(null, commentArray);
+ 
+            commentArray.forEach((comment, index) => {
+                likeModel.findCommentsLikesAmount(comment.comments_id, (err, cres) => {
                     if (hasError) return;
                     if (err) {
                         hasError = true;
-                        return res.status(500).json({ message: 'Error checking like status' });
+                        return callback(err);
                     }
-
-                    // 更新当前评论的点赞数和点赞状态
-                    result[index].likes_count = cres[0]['COUNT(*)'];
-                    result[index].isLiked = isRes;
-
-                    // 检查是否所有评论处理完成
-                    processed++;
-                    if (processed === total) {
-                        res.json({ length: total, result });
-                    }
+ 
+                    likeModel.isCommentLiked(userId, comment.comments_id, (err, isRes) => {
+                        if (hasError) return;
+                        if (err) {
+                            hasError = true;
+                            return callback(err);
+                        }
+ 
+                        // 更新当前评论的点赞数和点赞状态
+                        commentArray[index].likes_count = cres[0]['COUNT(*)'];
+                        commentArray[index].isLiked = isRes;
+ 
+                        // 如果有回复，递归处理回复的点赞信息
+                        if (commentArray[index].replies && commentArray[index].replies.length > 0) {
+                            processLikes(commentArray[index].replies, (err) => {
+                                if (err) {
+                                    hasError = true;
+                                    return callback(err);
+                                }
+ 
+                                processed++;
+                                if (processed === total) {
+                                    callback(null, commentArray);
+                                }
+                            });
+                        } else {
+                            processed++;
+                            if (processed === total) {
+                                callback(null, commentArray);
+                            }
+                        }
+                    });
                 });
+            });
+        };
+ 
+        // 处理所有评论及其回复的点赞信息
+        processLikes(topLevelComments, (err, processedComments) => {
+            if (err) {
+                return res.status(500).json({ message: 'Error processing likes' });
+            }
+ 
+            res.json({ 
+                length: topLevelComments.length, 
+                result: topLevelComments 
             });
         });
     });

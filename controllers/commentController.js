@@ -87,4 +87,21 @@ router.get('/like/userid', (req, res) => {
 
 //评论的回复
 
+router.post('/reply', (req, res) => {
+    const { userid, postid, parentid, comment, anonymous } = req.body;
+
+    if (!userid) {
+        return res.status(400).json({ error: 'user_id is required' });
+    }
+
+    commentModel.createReply({ userid, postid, parentid, comment, anonymous }, (err, result) => {
+        if (err) {
+            console.error('Error creating like:', err.message);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        res.json(result);
+    });
+});
+
 module.exports = router;
