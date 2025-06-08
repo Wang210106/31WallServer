@@ -80,7 +80,7 @@ function findCommentsByPostId(postId, callback) {
 function createReply(info, callback) {
     const { userid, postid, parentid , comment, anonymous } = info;
 
-    const query = 'INSERT INTO comments (user_id, post_id, parent_id , comment, anonymous, created_at) VALUES (?, ?, ?, ?, NOW())';
+    const query = 'INSERT INTO comments (user_id, post_id, parent_id , comment, anonymous, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
     pool.query(query, [userid, postid, parentid, comment, anonymous], (err, result, fields) => {
         if (err) {
             console.error('Error creating comment:', err);
